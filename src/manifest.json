@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Beef Detector",
+  "version": "0.1",
+  "author": "Maxim Chernyshev <maximcherny@gmail.com>",
+  "description": "Detects an active Beef hook and records exploitation activity",
+  "icons": { "128": "icon.png" },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "content_scripts": [{
+    "matches": ["http://*/*", "https://*/*", "file:///*"],
+    "js": ["content.js"],
+    "run_at": "document_start"
+  }],
+  "permissions": ["tabs", "http://*/*", "https://*/*"],
+  "background": {
+    "scripts": [
+      "jquery-2.1.1.min.js",
+      "sha1.js",
+      "ast.js",
+      "uglify.js",
+      "reflector.js",
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "web_accessible_resources": ["window.js"]
+}
