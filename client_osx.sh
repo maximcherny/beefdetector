@@ -3,6 +3,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 killall -9 "Google Chrome" > /dev/null 2>&1
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
 	--user-data-dir=$HOME/Desktop/beefometer \
+	--prerender=disabled \
+	--disable-prerender-local-predictor \
 	--no-first-run \
 	--disable-new-tab-first-run \
 	--load-extension=$DIR/src \
