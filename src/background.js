@@ -29,6 +29,14 @@ console.log(popup);
 chrome.runtime.onConnect.addListener(function(port) {
 	if (port.name == 'bg') {
 		bgPort = port;
+		chrome.tabs.query({}, function(tabs) {
+			for (var i = 0; i < tabs.length; i++) {
+				bgPort.postMessage({
+					action: 'tabCreated',
+					tab: tabs[i]
+				});
+			}
+		});
 		return;
 	} else if (port.name != 'content') {
 		return;
@@ -64,7 +72,6 @@ chrome.runtime.onConnect.addListener(function(port) {
 			case 'objectFingerprint':
 				break;
 		}
-		//console.log(msg, sender);
 	});
 });
 
@@ -81,6 +88,13 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
 		tab: tab,
 		change: change
 	});
+	if (change.status == 'complete' && typeof state[tabId] != 'undefined') {
+		bgPort.postMessage({
+			action: 'propertyAccess',
+			tabId: tabId,
+			state: state[tabId]
+		});
+	}
 });
 
 chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
@@ -90,11 +104,6 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 	});
 });
 
-chrome.tabs.onSelectionChanged.addListener(function(tabId, info) {
-	selectedId = tabId;
-	//
-});
-
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-	//
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+	selectedId = activeInfo.tabId;
 });
