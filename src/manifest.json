@@ -23,5 +23,8 @@
     ],
     "persistent": true
   },
-  "web_accessible_resources": ["window.js"]
+  "web_accessible_resources": [
+    "reflector.js",
+    "window.js"
+  ]
 }

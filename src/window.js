@@ -1,4 +1,6 @@
 
+window.WebKitProps = [];
+
 function emitEvent(detail) {
 	var e = document.createEvent('CustomEvent');
 	e.initCustomEvent('{event_name}', false, false, detail);
@@ -158,3 +160,29 @@ window.WebSocket = function(oldWebSocket) {
 		send.call(this, data);
 	};
 })(XMLHttpRequest.prototype.send);
+
+// Cache existing keys and poll for new global vars
+for (var prop in window) {
+	window.WebKitProps.push(prop);
+}
+
+setInterval(function() {
+	for (var prop in window) {
+		if (window.WebKitProps.indexOf(prop) != -1) {
+			continue;
+		}
+		var data = [];
+		var r = new Reflector(window[prop]);
+		r.getOwnMethodsRecursively(window[prop], data);
+		window.WebKitProps.push(prop);
+		if (data.length > 0) {
+			console.log(window[prop] instanceof jQuery);
+			console.log('New object with methods detected: ', prop, data.length);
+			emitEvent({
+				action: 'newGlobalVar',
+				prop: prop,
+				data: data
+			});
+		}
+	}
+}, 1000);

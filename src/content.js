@@ -15,6 +15,7 @@ function injectScript(src, inline) {
 	document.documentElement.appendChild(js);
 }
 
+injectScript('reflector.js');
 injectScript('window.js');
 
 //var response = "importScripts('" + chrome.extension.getURL('reflector.js') + "'); self.onmessage=function(e){postMessage('Worker: '+e.data);}";

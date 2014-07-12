@@ -69,7 +69,9 @@ chrome.runtime.onConnect.addListener(function(port) {
 				state[tabId].props[msg.prop]++;
 				state[tabId].total++;
 				break;
-			case 'objectFingerprint':
+			case 'newGlobalVar':
+				var ast = new ASTFingerprint(msg.data);
+				var tmp = ast.getMethodFingerprints();
 				break;
 		}
 	});
