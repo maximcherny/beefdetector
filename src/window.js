@@ -176,7 +176,6 @@ setInterval(function() {
 		r.getOwnMethodsRecursively(window[prop], data);
 		window.WebKitProps.push(prop);
 		if (data.length > 0) {
-			console.log(window[prop] instanceof jQuery);
 			console.log('New object with methods detected: ', prop, data.length);
 			emitEvent({
 				action: 'newGlobalVar',

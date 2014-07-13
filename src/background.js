@@ -3,19 +3,13 @@
 // found in the LICENSE file.
 
 // Global variables
-var fp;
 var bgPort;
 var selectedId = null;
 var state = {};
+var pool = new WorkerPool('worker.js', 4);
 
-$.ajax({
-	type: 'GET',
-	url: chrome.extension.getURL('beef.json'),
-	dataType: 'json',
-	success: function(data) {
-		fp = data;
-	},
-	async: false
+pool.registerOnMessage(function(e) {
+	console.log("Received (from worker): ", e.data);
 });
 
 var popup = window.open(
@@ -70,8 +64,11 @@ chrome.runtime.onConnect.addListener(function(port) {
 				state[tabId].total++;
 				break;
 			case 'newGlobalVar':
-				var ast = new ASTFingerprint(msg.data);
-				var tmp = ast.getMethodFingerprints();
+				pool.postMessage({
+					tabId: tabId,
+					prop: msg.prop,
+					data: msg.data
+				});
 				break;
 		}
 	});

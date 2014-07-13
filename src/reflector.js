@@ -1,5 +1,8 @@
 
 var Reflector = function(obj) {
+	this.maxDepth = 4;
+	this.maxMethods = 500;
+
 	this.typeOf = function(value) {
 		var s = typeof value;
 		if (s === 'object') {
@@ -56,13 +59,19 @@ var Reflector = function(obj) {
 		return methods;
 	};
 
-	this.getOwnMethodsRecursively = function(obj, data) {
+	this.getOwnMethodsRecursively = function(obj, data, level) {
+		level = typeof level !== 'undefined' ? level : 1;
+		if (level > this.maxDepth) return;
 		for (var method in obj) {
 			if (obj.hasOwnProperty(method)) {
-				if (typeof obj[method] == 'function') {
-					data.push(this.extractMethodSource(obj[method]));
-				} else if (this.typeOf(obj[method]) == 'object') {
-					this.getOwnMethodsRecursively(obj[method], data)
+				try {
+					if (typeof obj[method] == 'function') {
+						data.push(this.extractMethodSource(obj[method]));
+					} else if (this.typeOf(obj[method]) == 'object') {
+						this.getOwnMethodsRecursively(obj[method], data, level + 1)
+					}
+				} catch (err) {
+					console.log(err);
 				}
 			}
 		}
