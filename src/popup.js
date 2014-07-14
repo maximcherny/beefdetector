@@ -31,14 +31,26 @@ function renderTabPanel(tab) {
 
 	var $node1 = $(document.createElement('ul'));
 	var $leaf1 = $(document.createElement('li')).appendTo($node1);
-	$('<span><i class="icon-minus-sign"></i> Fingerptints</span><span>0</span>').appendTo($leaf1);
+	$('<span><i class="icon-minus-sign"></i> Fingerprints</span><span>0</span>').appendTo($leaf1);
 
 	var $node11 = $(document.createElement('ul'));
 	var $leaf11 = $(document.createElement('li')).appendTo($node11);
 	$('<span><i class="icon-eye-open"></i> Attribute Breakdown <pre></pre></span>').appendTo($leaf11);
 
+	var $node2 = $(document.createElement('ul'));
+	var $leaf2 = $(document.createElement('li')).appendTo($node2);
+	$('<span><i class="icon-minus-sign"></i> Globals</span><span>0</span>').appendTo($leaf2);
+
+	var $node21 = $(document.createElement('ul'));
+	var $leaf21 = $(document.createElement('li')).appendTo($node21);
+	$('<span><i class="icon-cog"></i> Match Breakdown <pre></pre></span>').appendTo($leaf21);
+
 	$node11.appendTo($leaf1);
 	$node1.appendTo($panel);
+
+	$node21.appendTo($leaf2);
+	$node2.appendTo($panel);
+
 	attachTabPanelEvents($panel);
 
 	return $panel;

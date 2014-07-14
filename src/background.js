@@ -9,6 +9,7 @@ var state = {};
 var pool = new WorkerPool('worker.js', 4);
 
 pool.registerOnMessage(function(e) {
+	// TODO: add match % display and logic
 	console.log("Received (from worker): ", e.data);
 });
 
