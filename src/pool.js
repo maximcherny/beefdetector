@@ -15,7 +15,7 @@ WorkerPool = (function() {
 			+function (i) {
 				myWorker.addEventListener('message', function(e) {
 					var data = e.data;
-					console.log("Worker #" + i + " finished. status: " + data.status);
+					// console.log("Worker #" + i + " finished. status: " + data.status);
 					pool[i].status = true;
 					poolIds.push(i);
 				});
@@ -43,7 +43,7 @@ WorkerPool = (function() {
 		this.getFreeWorkerId(function(workerId) {
 			pool[workerId].status = false;
 			var worker = pool[workerId].worker;
-			console.log("postMessage with worker #" + workerId);
+			// console.log("postMessage with worker #" + workerId);
 			worker.postMessage(data);
 		});
 	};

@@ -1,4 +1,8 @@
 
+// Ensure that function source is available
+Object.freeze(Function.prototype);
+
+// Hijack property access calls to detect fingerprinting activity
 window.WebKitProps = [];
 
 function emitEvent(detail) {
@@ -11,7 +15,6 @@ function emitPropertyAccessEvent(prop) {
 	emitEvent({ action: 'propertyAccess', prop: prop });
 }
 
-// Hijack property access calls to detect fingerprinting activity
 window.WebKitNavigator = {};
 for (var prop in window.navigator) {
 	if (window.navigator.hasOwnProperty(prop))

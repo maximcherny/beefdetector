@@ -9,17 +9,55 @@ var state = {};
 var pool = new WorkerPool('worker.js', 4);
 
 pool.registerOnMessage(function(e) {
-	// TODO: add match % display and logic
-	console.log("Received (from worker): ", e.data);
+	state[e.data.tabId].objects.objects[e.data.prop] = e.data.match;
+	if (state[e.data.tabId].objects.maxMatch < e.data.match) {
+		state[e.data.tabId].objects.maxMatch = e.data.match;
+	}
 });
 
 var popup = window.open(
 	chrome.extension.getURL('popup.html'),
 	'beef-detector-popup',
-	'width=640,height=480'
+	'width=320,height=' + screen.height
 );
 
 console.log(popup);
+
+function initTabState(tabId) {
+	state[tabId] = {
+		props: {
+			props: {},
+			total: 0
+		},
+		objects: {
+			objects: {},
+			maxMatch: 0
+		}
+	};
+	// Dynamically observe for value changes
+	Object.observe(state[tabId].props.props, function(changes) {
+		changes.forEach(function(change) {
+			if (change.type == 'update' && bgPort) {
+				bgPort.postMessage({
+					action: 'propertyAccess',
+					tabId: tabId,
+					state: state[tabId].props
+				});
+			}
+		});
+	});
+	Object.observe(state[tabId].objects.objects, function(changes) {
+		changes.forEach(function(change) {
+			if (change.type == 'add' && bgPort) {
+				bgPort.postMessage({
+					action: 'newGlobalVar',
+					tabId: tabId,
+					state: state[tabId].objects
+				});
+			}
+		});
+	});
+}
 
 chrome.runtime.onConnect.addListener(function(port) {
 	if (port.name == 'bg') {
@@ -39,30 +77,15 @@ chrome.runtime.onConnect.addListener(function(port) {
 	port.onMessage.addListener(function(msg, sender) {
 		var tabId = sender.sender.tab.id;
 		switch (msg.action) {
+			case 'contentInit':
+				initTabState(tabId);
+				break;
 			case 'propertyAccess':
-				if (typeof state[tabId] == 'undefined') {
-					state[tabId] = {
-						props: {},
-						total: 0
-					};
-					Object.observe(state[tabId].props, function(changes) {
-						changes.forEach(function(change) {
-							if (change.type == 'update' && bgPort) {
-								bgPort.postMessage({
-									action: 'propertyAccess',
-									tabId: tabId,
-									state: state[tabId]
-								});
-							}
-							//console.log(change.type, change.name, change.oldValue);
-						});
-					});
+				if (typeof state[tabId].props.props[msg.prop] == 'undefined') {
+					state[tabId].props.props[msg.prop] = 0;
 				}
-				if (typeof state[tabId].props[msg.prop] == 'undefined') {
-					state[tabId].props[msg.prop] = 0;
-				}
-				state[tabId].props[msg.prop]++;
-				state[tabId].total++;
+				state[tabId].props.props[msg.prop]++;
+				state[tabId].props.total++;
 				break;
 			case 'newGlobalVar':
 				pool.postMessage({
@@ -88,6 +111,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
 		tab: tab,
 		change: change
 	});
+	/*
 	if (change.status == 'complete' && typeof state[tabId] != 'undefined') {
 		bgPort.postMessage({
 			action: 'propertyAccess',
@@ -95,6 +119,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
 			state: state[tabId]
 		});
 	}
+	*/
 });
 
 chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {

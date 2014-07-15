@@ -1,6 +1,3 @@
-// Copyright (c) 2014 Maxim Chernyshev. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
 
 // Global vars
 var $open;
@@ -9,8 +6,9 @@ var $closed;
 // Helper functions
 function attachTabPanelEvents($panel) {
 	var $tmp = $(document.createElement('div')).append($panel);
-	$('li:has(ul)', $tmp).addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
-	$('li.parent_li > span', $tmp).on('click', function (e) {
+	// $('li:has(ul)', $tmp).addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+	$('li:has(ul)', $tmp).addClass('parent_li');
+	$('li.parent_li > span', $tmp).on('click', function(e) {
 		var children = $(this).parent('li.parent_li').find(' > ul > li');
 		if (children.is(":visible")) {
 			children.hide('fast');
@@ -26,24 +24,24 @@ function attachTabPanelEvents($panel) {
 
 function renderTabPanel(tab) {
 	var $panel = $(document.createElement('li')).attr('id', 'tab-' + tab.id).text(' ');
-	$('<span><i class="icon-folder-open"></i> ' + ' [' + tab.id + ']' + '</span>').prependTo($panel);
+	$('<span class="label label-info"><i class="icon-folder-open"></i> ' + ' [' + tab.id + ']' + '</span>').prependTo($panel);
 	$(document.createElement('a')).attr('href', '#').text(tab.url).appendTo($panel);
 
 	var $node1 = $(document.createElement('ul'));
 	var $leaf1 = $(document.createElement('li')).appendTo($node1);
-	$('<span><i class="icon-minus-sign"></i> Fingerprints</span><span>0</span>').appendTo($leaf1);
+	$('<span class="label group-label"><i class="icon-plus-sign"></i> Fingerprinting</span><span class="badge badge-success">0</span>').appendTo($leaf1);
 
 	var $node11 = $(document.createElement('ul'));
-	var $leaf11 = $(document.createElement('li')).appendTo($node11);
-	$('<span><i class="icon-eye-open"></i> Attribute Breakdown <pre></pre></span>').appendTo($leaf11);
+	var $leaf11 = $(document.createElement('li')).appendTo($node11).hide();
+	$('<span><i class="icon-eye-open"></i> Details <pre></pre></span>').appendTo($leaf11);
 
 	var $node2 = $(document.createElement('ul'));
 	var $leaf2 = $(document.createElement('li')).appendTo($node2);
-	$('<span><i class="icon-minus-sign"></i> Globals</span><span>0</span>').appendTo($leaf2);
+	$('<span class="label group-label"><i class="icon-plus-sign"></i> BeEF Object Match</span><span class="badge badge-success">0</span>').appendTo($leaf2);
 
 	var $node21 = $(document.createElement('ul'));
-	var $leaf21 = $(document.createElement('li')).appendTo($node21);
-	$('<span><i class="icon-cog"></i> Match Breakdown <pre></pre></span>').appendTo($leaf21);
+	var $leaf21 = $(document.createElement('li')).appendTo($node21).hide();
+	$('<span><i class="icon-eye-open"></i> Details <pre></pre></span>').appendTo($leaf21);
 
 	$node11.appendTo($leaf1);
 	$node1.appendTo($panel);
@@ -72,8 +70,22 @@ function onTabRemoved(tabId) {
 
 function onPropertyAccess(tabId, state) {
 	var $node = $('#tab-' + tabId + ' li:eq(0)');
-	$node.find('span:eq(1)').text(state.total);
+	var $count = $node.find('span:eq(1)');
+	if (state.total > 2000) {
+		$count.removeClass('badge-success').addClass('badge-warning');
+	}
+	$count.text(state.total);
 	$node.find('pre:eq(0)').text(JSON.stringify(state.props, undefined, 2));
+}
+
+function onNewGlobalVar(tabId, state) {
+	var $node = $('#tab-' + tabId + '> ul:eq(1) > li:eq(0)');
+	var $count = $node.find('span:eq(1)');
+	if (state.maxMatch == 1) {
+		$count.removeClass('badge-success').addClass('badge-important');
+	}
+	$count.text(state.maxMatch);
+	$node.find('pre:eq(0)').text(JSON.stringify(state.objects, undefined, 2));
 }
 
 $(function() {
@@ -100,6 +112,10 @@ $(function() {
 			// Fingerprinting activity
 			case 'propertyAccess':
 				onPropertyAccess(msg.tabId, msg.state);
+				break;
+			// Analysis of global objects
+			case 'newGlobalVar':
+				onNewGlobalVar(msg.tabId, msg.state);
 				break;
 		}
 		// console.log(msg);

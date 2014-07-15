@@ -24,7 +24,6 @@ var ASTFingerprint = function(methods) {
 			var shaObj = new jsSHA(nodeTypes.join(''), "TEXT");
 			return shaObj.getHash("SHA-1", "HEX");
 		} catch (err) {
-			console.log(err);
 			return null;
 		}
 	};

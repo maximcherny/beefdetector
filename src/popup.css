@@ -1,6 +1,10 @@
+.well {
+	padding: 0;
+}
+
 .tree {
 	min-height:20px;
-	padding:19px;
+	padding:0;
 	margin-bottom:20px;
 	background-color:#fbfbfb;
 	border:1px solid #999;
@@ -14,8 +18,9 @@
 .tree li {
 	list-style-type:none;
 	margin:0;
-	padding:10px 5px 0 5px;
-	position:relative
+	padding:1px 5px 0 5px;
+	position:relative;
+	font-size: 12px;
 }
 .tree li::before, .tree li::after {
 	content:'';
@@ -33,7 +38,7 @@
 .tree li::after {
 	border-top:1px solid #999;
 	height:20px;
-	top:25px;
+	top:15px;
 	width:25px
 }
 .tree li span {
@@ -61,5 +66,13 @@
 }
 
 pre {
-	font-size: 0.82em;
+	font-size: 10px;
+}
+
+.group-label {
+	width: 140px;
+}
+
+.badge-warning {
+	background-color: #f3c768;
 }

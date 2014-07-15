@@ -44,7 +44,6 @@ self.addEventListener('message', function(e) {
 	self.postMessage({
 		tabId: e.data.tabId,
 		prop: e.data.prop,
-		match: matches / maxMatches,
-		result: 'Fingerprinted!'
+		match: matches / maxMatches
 	});
 }, false);

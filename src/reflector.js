@@ -63,16 +63,17 @@ var Reflector = function(obj) {
 		level = typeof level !== 'undefined' ? level : 1;
 		if (level > this.maxDepth) return;
 		for (var method in obj) {
-			if (obj.hasOwnProperty(method)) {
-				try {
+			if (data.length == this.maxMethods) return;
+			try {
+				if (obj.hasOwnProperty(method)) {
 					if (typeof obj[method] == 'function') {
 						data.push(this.extractMethodSource(obj[method]));
 					} else if (this.typeOf(obj[method]) == 'object') {
 						this.getOwnMethodsRecursively(obj[method], data, level + 1)
 					}
-				} catch (err) {
-					console.log(err);
 				}
+			} catch (err) {
+				// console.log(err);
 			}
 		}
 	};
