@@ -43,11 +43,22 @@ function renderTabPanel(tab) {
 	var $leaf21 = $(document.createElement('li')).appendTo($node21).hide();
 	$('<span><i class="icon-eye-open"></i> Details <pre></pre></span>').appendTo($leaf21);
 
+	var $node3 = $(document.createElement('ul'));
+	var $leaf3 = $(document.createElement('li')).appendTo($node3);
+	$('<span class="label group-label"><i class="icon-plus-sign"></i> WebSocket Traffic</span><span class="badge badge-success">0</span>').appendTo($leaf3);
+
+	var $node31 = $(document.createElement('ul'));
+	var $leaf31 = $(document.createElement('li')).appendTo($node31).hide();
+	$('<span><i class="icon-eye-open"></i> Details <pre></pre></span>').appendTo($leaf31);
+
 	$node11.appendTo($leaf1);
 	$node1.appendTo($panel);
 
 	$node21.appendTo($leaf2);
 	$node2.appendTo($panel);
+
+	$node31.appendTo($leaf3);
+	$node3.appendTo($panel);
 
 	attachTabPanelEvents($panel);
 
@@ -88,6 +99,19 @@ function onNewGlobalVar(tabId, state) {
 	$node.find('pre:eq(0)').text(JSON.stringify(state.objects, undefined, 2));
 }
 
+function onWebSocket(tabId, state) {
+	var $node = $('#tab-' + tabId + '> ul:eq(2) > li:eq(0)');
+	var $count = $node.find('span:eq(1)');
+	if (state.heartbeat) {
+		$count.removeClass('badge-success').addClass('badge-warning');
+	}
+	if (state.jsPayload) {
+		$count.removeClass('badge-success').removeClass('badge-warning').addClass('badge-important');
+	}
+	$count.text(state.count);
+	$node.find('pre:eq(0)').text(JSON.stringify(state.urls, undefined, 2));
+}
+
 $(function() {
 	$open = $('#open-tabs ul:first');
 	$closed = $('#closed-tabs ul:first');
@@ -116,6 +140,10 @@ $(function() {
 			// Analysis of global objects
 			case 'newGlobalVar':
 				onNewGlobalVar(msg.tabId, msg.state);
+				break;
+			// WebSocket traffic
+			case 'webSocket':
+				onWebSocket(msg.tabId, msg.state);
 				break;
 		}
 		// console.log(msg);

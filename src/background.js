@@ -6,19 +6,46 @@
 var bgPort;
 var selectedId = null;
 var state = {};
-var pool = new WorkerPool('worker.js', 4);
 
+// Processing worker pools
+var pool = new WorkerPool('worker.js', 8);
 pool.registerOnMessage(function(e) {
-	state[e.data.tabId].objects.objects[e.data.prop] = e.data.match;
-	if (state[e.data.tabId].objects.maxMatch < e.data.match) {
-		state[e.data.tabId].objects.maxMatch = e.data.match;
+	switch (e.data.action) {
+		case 'newGlobalVar':
+			state[e.data.tabId].objects.objects[e.data.prop] = e.data.match;
+			if (state[e.data.tabId].objects.maxMatch < e.data.match) {
+				state[e.data.tabId].objects.maxMatch = e.data.match;
+			}
+			break;
+		case 'webSocket':
+			state[e.data.tabId].ws = e.data.state;
+			if (bgPort) {
+				bgPort.postMessage({
+					action: e.data.action,
+					tabId: e.data.tabId,
+					state: state[e.data.tabId].ws
+				});
+			}
+			break;
 	}
+
+	// TODO: refactor into the most approriate place
+	/*
+	if (state[e.data.tabId].objects.maxMatch == 1) {
+		var notification = webkitNotifications.createNotification(
+			'icon.png',
+			'BeEF Detector Alert!',
+			'An object that matches the BeEF fingerprint has been detected!'
+		);
+	}
+	*/
 });
 
+// Popup info window
 var popup = window.open(
 	chrome.extension.getURL('popup.html'),
 	'beef-detector-popup',
-	'width=320,height=' + screen.height
+	'width=480,height=' + screen.height
 );
 
 console.log(popup);
@@ -32,6 +59,12 @@ function initTabState(tabId) {
 		objects: {
 			objects: {},
 			maxMatch: 0
+		},
+		ws: {
+			urls: {},
+			count: 0,
+			heartbeat: false,
+			jsPayload: false
 		}
 	};
 	// Dynamically observe for value changes
@@ -90,8 +123,14 @@ chrome.runtime.onConnect.addListener(function(port) {
 			case 'newGlobalVar':
 				pool.postMessage({
 					tabId: tabId,
-					prop: msg.prop,
-					data: msg.data
+					msg: msg
+				});
+				break;
+			case 'webSocket':
+				pool.postMessage({
+					tabId: tabId,
+					msg: msg,
+					state: state[tabId].ws
 				});
 				break;
 		}
@@ -111,7 +150,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
 		tab: tab,
 		change: change
 	});
-	/*
 	if (change.status == 'complete' && typeof state[tabId] != 'undefined') {
 		bgPort.postMessage({
 			action: 'propertyAccess',
@@ -119,7 +157,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
 			state: state[tabId]
 		});
 	}
-	*/
 });
 
 chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {

@@ -130,7 +130,13 @@ window.WebSocket = function(oldWebSocket) {
 		var wrapper = this;
 
 		this.onmessage = function(data) {
-			// TODO: emit event
+			emitEvent({
+				action: 'webSocket',
+				prop: 'onmessage',
+				url: url,
+				data: data.data,
+				timestamp: new Date().getTime()
+			});
 			wrapper.customOnMessage(data);
 		};
 
@@ -139,7 +145,13 @@ window.WebSocket = function(oldWebSocket) {
 		});
 
 		this.send = function(message) {
-			// TODO: emit event
+			emitEvent({
+				action: 'webSocket',
+				prop: 'send',
+				url: url,
+				data: message,
+				timestamp: new Date().getTime()
+			});
 			try {
 				this.prototype.send(message);
 			} catch(err) {

@@ -11,7 +11,7 @@
     "js": ["content.js"],
     "run_at": "document_start"
   }],
-  "permissions": ["tabs", "http://*/*", "https://*/*"],
+  "permissions": ["tabs", "notifications", "http://*/*", "https://*/*"],
   "background": {
     "scripts": [
       "pool.js",
@@ -25,6 +25,7 @@
   },
   "web_accessible_resources": [
     "reflector.js",
-    "window.js"
+    "window.js",
+    "icon.png"
   ]
 }
