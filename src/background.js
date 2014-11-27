@@ -30,15 +30,18 @@ pool.registerOnMessage(function(e) {
 	}
 
 	// TODO: refactor into the most approriate place
-	/*
-	if (state[e.data.tabId].objects.maxMatch == 1) {
-		var notification = webkitNotifications.createNotification(
-			'icon.png',
-			'BeEF Detector Alert!',
-			'An object that matches the BeEF fingerprint has been detected!'
-		);
+	if (!state[e.data.tabId].notified && state[e.data.tabId].objects.maxMatch == 1) {
+		chrome.notifications.create('', {
+			type: 'basic',
+			iconUrl: 'icon.png',
+			title: 'BeEF Alert',
+			message: 'Hook signature detected',
+			priority: 2
+		}, function(id) {
+			//
+		});
+		state[e.data.tabId].notified = true;
 	}
-	*/
 });
 
 // Popup info window
@@ -52,6 +55,7 @@ console.log(popup);
 
 function initTabState(tabId) {
 	state[tabId] = {
+		notified: false,
 		props: {
 			props: {},
 			total: 0
